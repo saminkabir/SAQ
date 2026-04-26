@@ -78,6 +78,7 @@ inline std::string parseArgs(saqlib::QuantizeConfig *config = nullptr) {
 // Struct to store file paths for dataset loading
 struct DataFilePaths {
     std::string input_path;
+    std::string input_path_2;
     std::string result_path;
 
     std::string data_file;
@@ -97,12 +98,13 @@ struct DataFilePaths {
         size_t K = FLAGS_K;
         auto args_str = parseArgs();
 
-        input_path = std::string("/home/cc/datasets/") + dataset;
+        input_path = std::string("/home/cc/datasets/");
+        input_path_2 = std::string("/home/cc/index/ivf_index")
         result_path = std::string("./results/saq/");
 
         data_file = fmt::format("{}/{}/base{}.fvecs", input_path, dataset, use_pca ? "_pca" : "");
-        centroids_file = fmt::format("{}/{}/centroid_{}{}.fvecs", input_path, dataset, K, use_pca ? "_pca" : "");
-        cids_file = fmt::format("{}/{}/cluster_id_{}.ivecs", input_path, dataset, K);
+        centroids_file = fmt::format("{}/{}_centroid_{}{}.fvecs", input_path_2, dataset, K, use_pca ? "_pca" : "");
+        cids_file = fmt::format("{}/{}_cluster_id_{}.ivecs", input_path_2, dataset, K);
         data_vars_file = fmt::format("{}/{}/base{}.vars.fvecs", input_path, dataset, use_pca ? "_pca" : "");
 
         quant_file = fmt::format("{}/{}/index", input_path, args_str);

@@ -99,7 +99,7 @@ struct DataFilePaths {
         auto args_str = parseArgs();
 
         input_path = std::string("/home/cc/datasets/");
-        input_path_2 = std::string("/home/cc/index/ivf_index")
+        input_path_2 = std::string("/home/cc/index/ivf_index");
         result_path = std::string("./results/saq/");
 
         data_file = fmt::format("{}/{}/base{}.fvecs", input_path, dataset, use_pca ? "_pca" : "");

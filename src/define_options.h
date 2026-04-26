@@ -97,18 +97,18 @@ struct DataFilePaths {
         size_t K = FLAGS_K;
         auto args_str = parseArgs();
 
-        input_path = std::string("./data/") + dataset;
+        input_path = std::string("/home/cc/datasets/") + dataset;
         result_path = std::string("./results/saq/");
 
-        data_file = fmt::format("{}/{}_base{}.fvecs", input_path, dataset, use_pca ? "_pca" : "");
-        centroids_file = fmt::format("{}/{}_centroid_{}{}.fvecs", input_path, dataset, K, use_pca ? "_pca" : "");
-        cids_file = fmt::format("{}/{}_cluster_id_{}.ivecs", input_path, dataset, K);
-        data_vars_file = fmt::format("{}/{}_base{}.vars.fvecs", input_path, dataset, use_pca ? "_pca" : "");
+        data_file = fmt::format("{}/{}/base{}.fvecs", input_path, dataset, use_pca ? "_pca" : "");
+        centroids_file = fmt::format("{}/{}/centroid_{}{}.fvecs", input_path, dataset, K, use_pca ? "_pca" : "");
+        cids_file = fmt::format("{}/{}/cluster_id_{}.ivecs", input_path, dataset, K);
+        data_vars_file = fmt::format("{}/{}/base{}.vars.fvecs", input_path, dataset, use_pca ? "_pca" : "");
 
-        quant_file = fmt::format("{}/{}.index", input_path, args_str);
+        quant_file = fmt::format("{}/{}/index", input_path, args_str);
 
-        query_file = fmt::format("{}/{}_query{}.fvecs", input_path, dataset, use_pca ? "_pca" : "");
-        gt_file = fmt::format("{}/{}_groundtruth.ivecs", input_path, dataset);
+        query_file = fmt::format("{}/{}/query{}.fvecs", input_path, dataset, use_pca ? "_pca" : "");
+        gt_file = fmt::format("{}/{}/groundtruth.ivecs", input_path, dataset);
 
         if (FLAGS_searcher_dist_type == 1) {
             auto add_ip = [](std::string &s) {

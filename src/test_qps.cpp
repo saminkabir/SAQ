@@ -163,6 +163,7 @@ class QPSTester {
     void loadData(const DataFilePaths &paths) {
         utils::load_something<float, FloatRowMat>(paths.data_file.c_str(), data_);
         utils::load_something<float, FloatRowMat>(paths.query_file.c_str(), query_);
+        utils::load_something<uint32_t, FloatRowMat>(paths.query_file.c_str(), gt_);
         utils::load_something<PID, UintRowMat>(paths.gt_file.c_str(), gt_);
 
         size_t N = data_.rows();

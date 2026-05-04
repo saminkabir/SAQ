@@ -165,8 +165,7 @@ class QPSTester {
     void loadData(const DataFilePaths &paths) {
         utils::load_something<float, FloatRowMat>(paths.data_file.c_str(), data_);
         utils::load_something<float, FloatRowMat>(paths.query_file.c_str(), query_);
-        utils::load_something<uint32_t, FloatRowMat>(paths.query_file.c_str(), gt_);
-        utils::load_something<PID, UintRowMat>(paths.gt_file.c_str(), gt_);
+        // utils::load_something<PID, UintRowMat>(paths.gt_file.c_str(), gt_);
 
         size_t N = data_.rows();
         size_t DIM = query_.cols();
@@ -186,25 +185,25 @@ class QPSTester {
     void runQPSTests(const std::string &result_file, SearcherConfig &searcher_cfg) {
         std::vector<size_t> thread_nums_list;
         std::vector<size_t> nprob_list;
-        if (FLAGS_fix_thread == 0) {
-            thread_nums_list.push_back(1);
-            thread_nums_list.push_back(2);
-            thread_nums_list.push_back(4);
-            thread_nums_list.push_back(6);
-            thread_nums_list.push_back(8);
-            thread_nums_list.push_back(10);
-            thread_nums_list.push_back(12);
-            thread_nums_list.push_back(16);
-            thread_nums_list.push_back(20);
-            thread_nums_list.push_back(24);
-            thread_nums_list.push_back(28);
-            thread_nums_list.push_back(32);
-            thread_nums_list.push_back(40);
-            thread_nums_list.push_back(48);
-        } else {
-            thread_nums_list.push_back(FLAGS_fix_thread);
-        }
-
+        // if (FLAGS_fix_thread == 0) {
+        //     thread_nums_list.push_back(1);
+        //     thread_nums_list.push_back(2);
+        //     thread_nums_list.push_back(4);
+        //     thread_nums_list.push_back(6);
+        //     thread_nums_list.push_back(8);
+        //     thread_nums_list.push_back(10);
+        //     thread_nums_list.push_back(12);
+        //     thread_nums_list.push_back(16);
+        //     thread_nums_list.push_back(20);
+        //     thread_nums_list.push_back(24);
+        //     thread_nums_list.push_back(28);
+        //     thread_nums_list.push_back(32);
+        //     thread_nums_list.push_back(40);
+        //     thread_nums_list.push_back(48);
+        // } else {
+        //     thread_nums_list.push_back(FLAGS_fix_thread);
+        // }
+        thread_nums_list.push_back(1);
         if (FLAGS_fix_nprobe == 0) {
             nprob_list.push_back(5);
             for (size_t i = 10; i < 150; i += 10) {
@@ -244,14 +243,13 @@ class QPSTester {
 };
 
 class IndexCreator {
-  private:
+
+  public:
     FloatRowMat data_;
     FloatRowMat centroids_;
     UintRowMat cids_;
     FloatRowMat data_vars_;
     std::unique_ptr<IVF> ivf_;
-
-  public:
     void buildIndex(const std::string &dataset, size_t K, const QuantizeConfig &cfg, const std::string &args_str) {
         // Create file paths and load all data needed for index creation
         DataFilePaths paths;
@@ -262,7 +260,8 @@ class IndexCreator {
             utils::load_something<float, FloatRowMat>(paths.data_vars_file.c_str(), data_vars_);
         }
 
-        size_t num_threads = FLAGS_num_threads ? FLAGS_num_threads : 64;
+        // size_t num_threads = FLAGS_num_threads ? FLAGS_num_threads : 64;
+        size_t num_threads = FLAGS_num_threads ? FLAGS_num_threads : 1;
 
         size_t num_vecs = data_.rows();
         size_t num_dim = data_.cols();
@@ -314,6 +313,33 @@ int main(int argc, char *argv[]) {
 
     IndexCreator creator;
     creator.buildIndex(FLAGS_dataset, FLAGS_K, cfg, args_str);
+    std::string dataset_str = FLAGS_dataset;
+    DataFilePaths paths;
+
+    SearcherConfig searcher_cfg;
+    searcher_cfg.searcher_vars_bound_m = FLAGS_searcher_vars_bound_m;
+    if (FLAGS_searcher_dist_type == 0) {
+        searcher_cfg.dist_type = DistType::L2Sqr;
+    } else if (FLAGS_searcher_dist_type == 1) {
+        searcher_cfg.dist_type = DistType::IP;
+    } else {
+        LOG(ERROR) << "Invalid searcher distance type: " << FLAGS_searcher_dist_type;
+        return -1;
+    }
+
+    // Setup paths and parameters - use fixed nprobe instead of variable num_threads
+    std::string result_file = fmt::format("{}/qps_{}_{}_th{}_np{}", paths.result_path,
+                                          dataset_str, args_str.c_str(), FLAGS_fix_thread, FLAGS_fix_nprobe);
+
+    result_file += fmt::format("_sm{}", FLAGS_searcher_vars_bound_m);
+    if (FLAGS_searcher_dist_type == 1) {
+        result_file += "_ip";
+    }
+
+    // Run QPS test with fixed nprobe
+    QPSTester tester;
+    tester.loadData(paths);
+    tester.runQPSTests(result_file, searcher_cfg);
 
     return 0;
 }
